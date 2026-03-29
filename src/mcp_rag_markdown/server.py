@@ -6,7 +6,7 @@ RAG_ENDPOINT = os.environ.get("RAG_ENDPOINT", "http://localhost:8090")
 
 mcp = FastMCP(
     "rag-markdown",
-    description="Semantic search over a markdown knowledge base via RAG",
+    instructions="Semantic search over a markdown knowledge base via RAG",
 )
 
 
