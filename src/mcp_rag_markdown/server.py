@@ -37,14 +37,29 @@ async def query_vault(query: str, top_k: int = 5) -> str:
     if not data.get("results"):
         return "No results found."
 
+    results = data["results"]
+    max_score = max(r.get("score", 0) for r in results)
+
+    if max_score < 0.50:
+        return (
+            "⚠️ No relevant results found (best score: "
+            f"{max_score:.2f}, threshold: 0.50). "
+            "The vault may not contain information on this topic."
+        )
+
     lines = []
-    for r in data["results"]:
+    for r in results:
         score = r.get("score", 0)
         source = r.get("source", "?")
         text = r.get("text", "").strip()
-        lines.append(f"**[{score:.2f}] {source}**\n{text}\n")
+        confidence = "🟢" if score >= 0.60 else "🟡" if score >= 0.50 else "🔴"
+        lines.append(f"**{confidence} [{score:.2f}] {source}**\n{text}\n")
 
-    return "\n---\n".join(lines)
+    header = ""
+    if max_score < 0.60:
+        header = "⚠️ LOW CONFIDENCE — All results below 0.60. Use with caution.\n\n"
+
+    return header + "\n---\n".join(lines)
 
 
 @mcp.tool()
